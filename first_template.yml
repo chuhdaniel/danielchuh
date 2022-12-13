@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  "My first template to create an EC2 instance"
+Resources:
+  EC2Instance: #ec2 instance
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType:
+        't2.micro'
+      SubnetId:
+        'subnet-04ef127b711a9f463'
+      ImageId:
+        'ami-0b0dcb5067f052a63'
+      Tags:
+        - Key: 'Name'
+          Value: 'Test_instance'
+Resources:
+  AWSBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BuckeName: 'nrtechtestbucket'
