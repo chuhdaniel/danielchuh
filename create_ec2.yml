@@ -28,11 +28,11 @@ Resources:
           unzip awscliv2.zip
           ./aws/install
           ln -s /usr/local/bin/aws /usr/sbin
-      InstanceProfile: !Ref ManagedInstanceProfile
-  ManagedInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Path: "arn:aws:iam::311236944147:instance-profile/"
-      Roles:
-      - 'ssm-role'
-      InstanceProfileName: 'ssm_role' 
+  #     InstanceProfile: !Ref ManagedInstanceProfile
+  # ManagedInstanceProfile:
+  #   Type: AWS::IAM::InstanceProfile
+  #   Properties:
+  #     Path: "arn:aws:iam::311236944147:instance-profile/"
+  #     Roles:
+  #     - 'ssm-role'
+  #     InstanceProfileName: 'ssm_role' 
