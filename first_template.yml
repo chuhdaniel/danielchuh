@@ -18,4 +18,10 @@ Resources:
   AWSBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      BuckeName: 'nrtechtestbucket'
+      BucketName: 'nrtechtestbucket'
+Resources:
+  SgNestedStack:
+    Type: AWS::CloudFormation::StacK
+    Properties:
+      TemplateURL: https://aws.s3.amazon.com/
+      
