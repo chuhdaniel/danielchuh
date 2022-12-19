@@ -1,6 +1,25 @@
 ---
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "This template will create EC2 instances"
+
+Parameters:
+  # MySubnet:
+  #   Description: "Enter Desired Subnet ID"
+  #   Type: String
+  AMI:
+    Description: "Input Desired Image ID"
+    Type: String
+  MyInstanceType:
+    Description: "Input Instance Type"
+    Type: String
+    Default: "t2.micro"
+    AllowedValues:
+      - t2.micro
+      - t2.medium
+      - t3.nano
+      - t3.small
+      - t3.medium
+
 Resources:
   MyEC2Instance:
     Type: "AWS::EC2::Instance"
@@ -8,9 +27,11 @@ Resources:
       Tags:
         - Key: Name
           Value: Test_instance
-      InstanceType: 't2.micro'
-      SubnetId: 'subnet-04ef127b711a9f463'
-      ImageId: 'ami-0b0dcb5067f052a63'
+      InstanceType: !Ref MyInstanceType
+      SubnetId: !ImportValue new-vpc-stack-PublicSubnet
+      ImageId: !Ref AMI
+      SecurityGroupIds: 
+        - !ImportValue new-vpc-stack-PublicSG
       BlockDeviceMappings:
         - DeviceName: "/dev/sdm"
           Ebs: 
