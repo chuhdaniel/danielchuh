@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../AWS/SysOPS Administrator/code"
+		},
+		{
+			"path": "../AWS/DevOPS Engineer/code"
+		},
+		{
+			"path": "../AWS/nrtech_repo"
+		},
+		{
+			"path": "../B.Sc Software Engineering/PW22-Programming (A)/Homework 2"
+		}
+	],
+	"settings": {
+		"notebook.output.textLineLimit": 1000
+	}
+}

@@ -14,12 +14,10 @@ Resources:
       Tags:
         - Key: 'Name'
           Value: 'Test_instance'
-Resources:
   AWSBucket:
     Type: "AWS::S3::Bucket"
     Properties:
       BucketName: 'nrtechtestbucket'
-Resources:
   SgNestedStack:
     Type: AWS::CloudFormation::StacK
     Properties:
