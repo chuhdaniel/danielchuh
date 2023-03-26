@@ -98,4 +98,4 @@ Resources:
       #   Properties:
       #     Path: "arn:aws:iam::311236944147:role/ssm_role"
       #     Roles: 
-      #       - Ref: 'ssm-role'
+      #       - Ref: "ssm-role"
