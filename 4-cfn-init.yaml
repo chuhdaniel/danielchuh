@@ -2,7 +2,7 @@
 Parameters:
   SSHKey:
     Type: AWS::EC2::KeyPair::KeyName
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Description: Name of an existing EC2 KeyPair to enable SSH access to an instance
 
 Resources:
   MyInstance:
