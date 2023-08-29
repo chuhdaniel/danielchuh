@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "../AWS/Terraform/Terraform projects"
+		},
+		{
+			"path": "../AWS/Packer"
 		}
 	],
 	"settings": {
