@@ -20,9 +20,17 @@
 		},
 		{
 			"path": "../AWS/Packer"
+		},
+		{
+			"path": "../AWS/Certified Kubernetes Administrator/Kub_projects"
+		},
+		{
+			"name": "first",
+			"path": "../../../Documents/first"
 		}
 	],
 	"settings": {
-		"notebook.output.textLineLimit": 1000
+		"notebook.output.textLineLimit": 1000,
+		"powershell.cwd": "git_repo"
 	}
 }

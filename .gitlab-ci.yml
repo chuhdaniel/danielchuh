@@ -1,0 +1,136 @@
+stages:
+  - build
+  - qa
+  # - prod
+
+variables:
+  SCRIPT_CONTENT: |
+    #!/bin/bash
+
+    set -eo pipefail
+
+    function usage {
+        echo -e "$0"
+        exit 1
+    }
+
+    VERSION=""
+    CUR_VERSION=""
+    NEXT_VERSION=""
+    LIQUIBASE_CONFIG="$HOME/.liquibase.qa"
+    MYSQL_HOST="qa.cg7hgpcq5pxv.us-west-2.rds.amazonaws.com"
+    QA_KUBECONFIG=/home/ubuntu/.kube/config.qa1ms
+    MINIKUBE_DIR=/home/ubuntu/services/budderfly.cloud/minikube/
+
+    # get version
+    if [ -f ./pom.xml ]; then
+        # usual project
+        CUR_VERSION=$(grep -F "<version>" pom.xml | head -n1 | sed 's/<[^>]*>//g' | tr -d ' ')
+    elif [ -f ./webpack/utils.js ]; then
+        # specific for billing.web
+        CUR_VERSION=$(grep -E "return '[0-9]+\.[0-9]+\.[0-9]+'" webpack/utils.js | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+    fi
+
+    if [ -z "$CUR_VERSION" ]; then
+        echo -e "[x] unable to get the current version number."
+        exit 1
+    else
+        NEXT_VERSION="${CUR_VERSION%.*}.$((${CUR_VERSION##*.} + 1))"
+    fi
+
+    # validate version
+    echo -e "[$CUR_VERSION] -> [$NEXT_VERSION]"
+    while true; do
+        read -p "Ctrl-C to cancel, y/n> " -a res
+        if [ "$res" = "n" ]; then
+            read -p "new version?> " -a NEXT_VERSION
+            echo -e "[$CUR_VERSION] -> [$NEXT_VERSION]"
+        elif [ "$res" = "y" ]; then
+            break
+        fi
+    done
+    VERSION="$NEXT_VERSION"
+
+    # build/deploy
+    git -C "$MINIKUBE_DIR" pull
+    git checkout master
+    git pull origin master
+    git checkout develop
+    git pull origin develop
+    echo -e "[i] ready to deploy $VERSION? Ctrl-C to cancel."
+    read
+    git flow release start "$VERSION"
+    ./build.sh "$VERSION"
+
+    #check the db backup script exists
+    if [ -f ./backup_db.sh ]; then
+        #set the db name from the app cfg
+        MYSQL_DB_NAME=$(grep -E "url.*mysql" src/main/resources/config/application-prod.yml | sed 's/.*\/\(.*[^?]\)?.*/\1/g')
+        #source qa liquibase config
+        source $LIQUIBASE_CONFIG
+        #check qa liquibase changelog is up to date
+        OUTPUT=$(mvn -q -Dliquibase.driver="$LIQUIBASE_DRIVER" -Dliquibase.url="$LIQUIBASE_URL" -Dliquibase.dbname="$MYSQL_DB_NAME" -Dliquibase.username="$LIQUIBASE_USERNAME" -Dliquibase.password="$LIQUIBASE_PASSWORD" -Dliquibase.logging=off liquibase:status)
+        echo $OUTPUT
+        if [[ $OUTPUT == *"is up to date"* ]] && [[ $OUTPUT == *"$MYSQL_HOST"* ]]; then
+            echo "Liquibase is up to date. Skipping database backup."
+        else
+            echo -e "[i] ready to backup? Ctrl-C to cancel."
+            read
+            ./backup_db.sh qa1ms
+        fi
+    fi
+    if [ -f ./update_db.sh ]; then
+        echo -e "[i] ready to update db? Ctrl-C to cancel."
+        read
+        source ~/.liquibase.qa
+        ./update_db.sh qa1ms
+    fi
+    echo -e "[i] ready to deploy? Ctrl-C to cancel."
+    read
+    KUBECONFIG=$QA_KUBECONFIG bash -c "./deploy.sh qa1ms \"$VERSION\""
+    echo -e "[i] ready to push release? Ctrl-C to cancel."
+    read
+    git add .
+    git commit -vm "Release v$VERSION"
+    git flow release finish "$VERSION" -m "Release "
+    git push origin master
+    git push origin develop
+    git push --tags
+  SSH_PRIVATE_KEY:
+  Version: 0.01
+
+before_script:
+  - export $HOME=$(pwd)
+  - mkdir -p 
+
+# build:
+#   stage: build
+#   script:
+#     - # Add your build commands here
+#     - ./build.sh $Variable
+
+qa:
+  stage: qa
+  image: docker:latest
+  script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H your-remote-server >> ~/.ssh/known_hosts
+    - echo "$SCRIPT_CONTENT" > deploy_qa  
+    - chmod +x deploy_qa
+    - docker run -v $(pwd):/app your-docker-image ./deploy_qa
+test:
+  stage: test
+  script:
+    - ./test-acessibility.sh
+    - ./security
+  
+# prod:
+#   stage: prod
+#   script:
+#     - # Add your qa commands here
+#     - ./deploy_prod
+#   depends
+

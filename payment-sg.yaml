@@ -1,0 +1,465 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This is the base cloudformation for dev ec2 env security groups.
+
+
+Mappings:
+  EnvironmentMap:
+    # Production Account
+    '733276539406':
+      Environment: production
+      CidrIp: 10.23.0.0/16
+
+
+    # UAT Account
+    '997326064572':
+      Environment: uat
+      CidrIp: 10.21.0.0/16
+
+
+    # Sandbox Account
+    '597632436094':
+      Environment: sandbox
+      CidrIp: 10.22.0.0/16
+
+
+    # Development Account
+    '':
+      Environment: development
+      CidrIp: 10.25.0.0/16
+
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Dev Ec2 Env SG ingress 1"
+      VpcId: !ImportValue vpc-id
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "10.100.0.0/20"
+          Description: http-traffic-from-sandiego-network
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "10.102.0.0/24"
+          Description: http-traffic-from-sd-att-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "10.101.0.0/20"
+          Description: http-traffic-from-sd-inscope-network
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "192.168.4.0/24"
+          Description: http-traffic-from-sd-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "10.100.100.0/22"
+          Description: http-traffic-from-okta-sd-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "192.168.5.0/24"
+          Description: http-traffic-from-sd-pci-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "10.100.200.0/24"
+          Description: http-traffic-from-okta-sd-pci-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !FindInMap [ EnvironmentMap, !Ref 'AWS::AccountId', CidrIp ]
+          Description: http-traffic-from-local-network
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "10.102.0.0/24"
+          Description: https-traffic-from-sd-att-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "10.101.0.0/20"
+          Description: https-traffic-from-sd-inscope-network
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "192.168.4.0/24"
+          Description: https-traffic-from-sd-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "10.100.100.0/22"
+          Description: https-traffic-from-okta-sd-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "192.168.5.0/24"
+          Description: https-traffic-from-sd-pci-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "10.100.200.0/24"
+          Description: https-traffic-from-okta-sd-pci-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !FindInMap [ EnvironmentMap, !Ref 'AWS::AccountId', CidrIp ]
+          Description: https-traffic-from-local-network
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.81.90.64/26
+          Description: Test Rule *REMOVE WHEN FINISHED.
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 10.81.90.64/26
+          Description: Test Rule *REMOVE WHEN FINISHED.
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 10.80.135.144/29
+          Description: Test Rule *REMOVE WHEN FINISHED.
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.80.135.144/29
+          Description: Test Rule *REMOVE WHEN FINISHED.
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 10.81.90.64/26
+          Description: Test Rule *REMOVE WHEN FINISHED.
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 10.80.135.144/29
+          Description: Test Rule *REMOVE WHEN FINISHED.
+        - IpProtocol: tcp
+          FromPort: 139
+          ToPort: 139
+          CidrIp: 10.25.0.0/16
+          Description: allow port 139 from dev vpc
+        - IpProtocol: tcp
+          FromPort: 445
+          ToPort: 445
+          CidrIp: 10.25.0.0/16
+          Description: allow port 445 from dev vpc         
+
+
+  ExtraSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Dev Ec2 Env SG ingress 2"
+      VpcId: !ImportValue vpc-id
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 10933
+          ToPort: 10933
+          CidrIp: "10.24.0.0/16"
+          Description: octopus-traffic-from-org-account-cidr
+        - IpProtocol: "tcp"
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: "10.100.0.0/20"
+          Description: rdp-traffic-from-sandiego-cidr-tcp
+        - IpProtocol: "tcp"
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: "192.168.4.0/24"
+          Description: rdp-ldap-traffic-from-sd-vpn-cidr-tcp
+        - IpProtocol: "tcp"
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: "10.100.100.0/22"
+          Description: rdp-ldap-traffic-from-okta-sd-vpn-cidr-tcp
+        - IpProtocol: "tcp"
+          FromPort: 135
+          ToPort: 135
+          CidrIp: "10.24.0.0/16"
+          Description: ad-rpc-endpoint-mapper-port-from-shared-services-tcp
+        - IpProtocol: "udp"
+          FromPort: 135
+          ToPort: 135
+          CidrIp: "10.24.0.0/16"
+          Description: ad-rpc-endpoint-mapper-port-from-shared-services-udp
+        - IpProtocol: "tcp"
+          FromPort: 137
+          ToPort: 139
+          CidrIp: "10.24.0.0/16"
+          Description: ad-netbios-service-from-shared-services-tcp
+        - IpProtocol: "udp"
+          FromPort: 137
+          ToPort: 139
+          CidrIp: "10.24.0.0/16"
+          Description: ad-netbios-service-from-shared-services-udp
+        - IpProtocol: "udp"
+          FromPort: 135
+          ToPort: 139
+          CidrIp: "10.100.100.0/22"
+          Description: smb-udp-access-sd-okta-vpn
+        - IpProtocol: "udp"
+          FromPort: 135
+          ToPort: 139
+          CidrIp: "10.102.0.0/24"
+          Description: smb-udp-access-sd-att-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 135
+          ToPort: 139
+          CidrIp: "10.100.100.0/22"
+          Description: smb-tcp-access-sd-okta-vpn
+        - IpProtocol: "tcp"
+          FromPort: 135
+          ToPort: 139
+          CidrIp: "10.102.0.0/24"
+          Description: smb-tcp-access-sd-att-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 445
+          ToPort: 445
+          CidrIp: "10.100.100.0/22"
+          Description: smb-tcp-access-sd-okta-vpn
+        - IpProtocol: "tcp"
+          FromPort: 445
+          ToPort: 445
+          CidrIp: "10.102.0.0/24"
+          Description: smb-tcp-access-sd-att-vpn-network
+        - IpProtocol: "udp"
+          FromPort: 445
+          ToPort: 445
+          CidrIp: "10.100.100.0/22"
+          Description: smb-udp-access-sd-okta-vpn
+        - IpProtocol: "udp"
+          FromPort: 445
+          ToPort: 445
+          CidrIp: "10.102.0.0/24"
+          Description: smb-udp-access-sd-att-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 445
+          ToPort: 445
+          CidrIp: "10.24.0.0/16"
+          Description: ad-smb-service-from-shared-services-tcp
+        - IpProtocol: "udp"
+          FromPort: 445
+          ToPort: 445
+          CidrIp: "10.24.0.0/16"
+          Description: ad-smb-service-from-shared-services-udp
+        - IpProtocol: "tcp"
+          FromPort: 3286
+          ToPort: 3286
+          CidrIp: "10.24.0.0/16"
+          Description: ad-ldap-global-catalog-datagram-service-from-shared-services
+        - IpProtocol: "tcp"
+          FromPort: 88
+          ToPort: 88
+          CidrIp: "10.24.0.0/16"
+          Description: ad-kerberos-service-from-shared-services-tcp
+        - IpProtocol: "udp"
+          FromPort: 88
+          ToPort: 88
+          CidrIp: "10.24.0.0/16"
+          Description: ad-kerberos-service-from-shared-services-udp
+        - IpProtocol: "tcp"
+          FromPort: 53
+          ToPort: 53
+          CidrIp: "10.24.0.0/16"
+          Description: ad-dns-service-from-shared-services-tcp
+        - IpProtocol: "udp"
+          FromPort: 53
+          ToPort: 53
+          CidrIp: "10.24.0.0/16"
+          Description: ad-dns-service-from-shared-services-udp
+        - IpProtocol: "tcp"
+          FromPort: 1512
+          ToPort: 1512
+          CidrIp: "10.24.0.0/16"
+          Description: ad-wins-service-from-shared-services-tcp
+        - IpProtocol: "udp"
+          FromPort: 1512
+          ToPort: 1512
+          CidrIp: "10.24.0.0/16"
+          Description: ad-wins-resolution-service-from-shared-services-udp
+        - IpProtocol: "tcp"
+          FromPort: 42
+          ToPort: 42
+          CidrIp: "10.24.0.0/16"
+          Description: ad-wins-replication-service-from-shared-services-tcp
+        - IpProtocol: "udp"
+          FromPort: 42
+          ToPort: 42
+          CidrIp: "10.24.0.0/16"
+          Description: ad-wins-replication-service-from-shared-services-udp
+        - IpProtocol: "tcp"
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: "10.102.0.0/24"
+          Description: rdp-traffic-from-sd-att-vpn-network-tcp
+        - IpProtocol: icmp
+          FromPort: 8
+          ToPort: -1
+          CidrIp: !FindInMap [ EnvironmentMap, !Ref 'AWS::AccountId', CidrIp ]
+          Description: ping-traffic-from-development-cidr
+        - IpProtocol: icmp
+          FromPort: 8
+          ToPort: -1
+          CidrIp: "10.100.100.0/22"
+          Description: ping-traffic-from-sd-okta-vpn-cidr
+        - IpProtocol: icmp
+          FromPort: 8
+          ToPort: -1
+          CidrIp: "10.102.0.0/24"
+          Description: ping-traffic-from-sd-att-vpn-network
+        - IpProtocol: "tcp"
+          FromPort: 1433
+          ToPort: 1433
+          CidrIp: "10.100.100.0/22"
+          Description: sql-traffic-from-sd-okta-server-cidr-tcp
+        - IpProtocol: "tcp"
+          FromPort: 1433
+          ToPort: 1433
+          CidrIp: "10.102.0.0/24"
+          Description: sql-traffic-from-sd-att-vpn-network-tcp
+        - IpProtocol: "tcp"
+          FromPort: 1433
+          ToPort: 1433
+          CidrIp: "10.25.0.0/16"
+          Description: sql-tcp-access-development
+        - IpProtocol: "tcp"
+          FromPort: 1434
+          ToPort: 1434
+          CidrIp: "10.100.100.0/22"
+          Description: sql-traffic-from-sd-okta-cidr-tcp
+        - IpProtocol: "tcp"
+          FromPort: 1434
+          ToPort: 1434
+          CidrIp: "10.102.0.0/24"
+          Description: sql-traffic-from-sd-att-vpn-network-tcp
+        - IpProtocol: "tcp"
+          FromPort: 1434
+          ToPort: 1434
+          CidrIp: !FindInMap [ EnvironmentMap, !Ref 'AWS::AccountId', CidrIp ]
+          Description: sql-tcp-access-development
+        - IpProtocol: "-1"
+          CidrIp: "10.24.0.0/16"
+          Description: all-traffic-from-org-account
+        - IpProtocol: "-1"
+          CidrIp: "10.25.0.0/16"
+          Description: all-traffic-from-dev-account
+        - IpProtocol: tcp
+          FromPort: 5985
+          ToPort: 5985
+          CidrIp: 10.25.0.0/16
+        - IpProtocol: tcp
+          FromPort: 5986
+          ToPort: 5986
+          CidrIp: 10.25.0.0/16
+        - IpProtocol: -1
+          CidrIp: 10.100.0.0/20
+          Description: TEMP RULE FOR LOGIN
+        - IpProtocol: tcp
+          FromPort: 139
+          ToPort: 139
+          CidrIp: 10.25.0.0/16
+          Description: allow port 139 from dev vpc
+        - IpProtocol: tcp
+          FromPort: 445
+          ToPort: 445
+          CidrIp: 10.25.0.0/16
+          Description: ad-smb-service-from-dev-udp
+        - IpProtocol: "-1"
+          FromPort: "-1"
+          ToPort: "-1"
+          SourceSecurityGroupId: !ImportValue NessusSecurityGroupId
+          Description: all ports from Nessus        
+      Tags:
+      -
+        Key: Name
+        Value: Ec2IngressSecurityGroup
+
+
+Outputs:
+  UatEc2EnvSG1:
+    Description: Security Group 1 for Dev Env Ec2s.
+    Value: !Ref SecurityGroup
+    Export:
+      Name: SgEc2Env1-dev-id
+  UatEc2EnvSG2:
+    Description: Security Group 2 for Dev Env Ec2s.
+    Value: !Ref ExtraSecurityGroup
+    Export:
+      Name: SgEc2Env2-dev-id
+
+
+      - Description: kubernetes.io/rule/nlb/mtu
+        IpProtocol: icmp
+        CidrIp: 0.0.0.0/0
+      - Description: "kubernetes.io/rule/nlb/client=a9bb2073473de43e78100c5d0761efd8"
+        IpProtocol: "tcp"
+        FromPort: 30913
+        ToPort: 30913
+        CidrIp: 10.25.160.0/20
+      - Description: "kubernetes.io/rule/nlb/client=a9bb2073473de43e78100c5d0761efd8"
+        IpProtocol: "tcp"
+        FromPort: 30913
+        ToPort: 30913
+        CidrIp: 10.25.128.0/20
+      - Description: "kubernetes.io/rule/nlb/client=a9bb2073473de43e78100c5d0761efd8"
+        IpProtocol: "tcp"
+        FromPort: 30913
+        ToPort: 30913
+        CidrIp: 10.25.180.0/20
+      - Description: "kubernetes.io/rule/nlb/client=a9bb2073473de43e78100c5d0761efd8"
+        IpProtocol: "tcp"
+        FromPort: 30307
+        ToPort: 30307
+        CidrIp: 0.0.0.0/0
+      - Description: "kubernetes.io/rule/nlb/client=a9bb2073473de43e78100c5d0761efd8"
+        IpProtocol: "tcp"
+        FromPort: 30085
+        ToPort: 30085
+        CidrIp: 0.0.0.0/0
+      - Description: "kubernetes.io/rule/nlb/client=a9bb2073473de43e78100c5d0761efd8"
+        IpProtocol: "tcp"
+        FromPort: 32323
+        ToPort: 32323
+        CidrIp: 0.0.0.0/0
+      - Description: "kubernetes.io/rule/nlb/client=a9bb2073473de43e78100c5d0761efd8"
+        IpProtocol: "tcp"
+        FromPort: 31703
+        ToPort: 31703
+        CidrIp: 0.0.0.0/0
+
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 10.81.90.64/26
+        Description: Test Rule *REMOVE WHEN FINISHED.
+      - IpProtocol: icmp
+        FromPort: -1
+        ToPort: -1
+        CidrIp: 10.81.90.64/26
+        Description: Test Rule *REMOVE WHEN FINISHED.
+      - IpProtocol: icmp
+        FromPort: -1
+        ToPort: -1
+        CidrIp: 10.80.135.144/29
+        Description: Test Rule *REMOVE WHEN FINISHED.
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 10.80.135.144/29
+        Description: Test Rule *REMOVE WHEN FINISHED.
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 10.81.90.64/26
+        Description: Test Rule *REMOVE WHEN FINISHED.
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 10.80.135.144/29
+        Description: Test Rule *REMOVE WHEN FINISHED.

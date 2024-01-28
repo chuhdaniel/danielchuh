@@ -1,0 +1,33 @@
+Resources:
+  EC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      # ... other properties ...
+
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            /bin/systemctl stop jenkins || /bin/true
+            /bin/systemctl start jenkins || /bin/true
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: EC2Instance
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "900"  # Timeout in seconds (adjust as needed)
+
+- host: qa2mshome.budderfly.com
+    http:
+      paths:
+      - backend:
+          serviceName: homemainweb
+          servicePort: 8081
+        path: /*
+      - backend:
+          serviceName: homecmsweb
+          servicePort: 5645
+        path: /homecmsweb
