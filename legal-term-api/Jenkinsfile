@@ -9,7 +9,7 @@ pipeline {
         ECR_REGISTRY = 'your-ecr-registry-url'
         AWS_DEFAULT_REGION = 'your-aws-region'
         DOCKER_IMAGE_NAME = 'legalterm'
-        DOCKERFILE_PATH = './Dockerfile'
+        DOCKERFILE_PATH = './legal-term/Dockerfile'
     }
 
     stages {
@@ -99,7 +99,7 @@ pipeline {
     post {
         always {
             // archive test results
-            junit 'reports/**/*.xml'
+            junit 'legal-term/tests/reports/**/*.xml'
         }
     }
 }
