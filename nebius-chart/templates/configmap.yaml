@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap # create a configmap with the web content from user input or default value
+metadata:
+  name: {{ include "nebius-chart.fullname" . }}-web-content
+data:
+  index.html: |
+    <html>
+      <head>
+        <title>Nebius Helm Chart</title>
+      </head>
+      <body>
+        <h1>{{ .Values.webContent }}</h1> # web page content from user input or default value
+      </body>
+    </html>

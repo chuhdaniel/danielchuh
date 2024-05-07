@@ -1,0 +1,45 @@
+{
+	"folders": [
+		{
+			"path": "../AWS/SysOPS Administrator/code"
+		},
+		{
+			"path": "../AWS/DevOPS Engineer/code"
+		},
+		{
+			"path": "../AWS/nrtech_repo"
+		},
+		{
+			"path": "../B.Sc Software Engineering/PW22-Programming (A)/Homework 2"
+		},
+		{
+			"path": "../AWS/Terraform/Terraform projects"
+		},
+		{
+			"path": "../AWS/Packer"
+		},
+		{
+			"path": "../AWS/Certified Kubernetes Administrator/Kub_projects"
+		},
+		{
+			"name": "first",
+			"path": "../../../Documents/first"
+		},
+		{
+			"path": "../takehome-assignment"
+		},
+		{
+			"path": "../Quicksight/quicksight_testcases"
+		},
+		{
+			"path": "../workspace"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"notebook.output.textLineLimit": 1000,
+		"powershell.cwd": "git_repo"
+	}
+}

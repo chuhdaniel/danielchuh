@@ -1,0 +1,64 @@
+stages:
+  - checkout
+  - install_dependencies
+  - unit_tests
+  - integration_tests
+  - build_and_push_docker_image
+  - helm_deploy
+
+variables:
+  KUBE_CONFIG: "your-kube-config-credential-id"
+  HELM_CHART_PATH: ".helm/"
+  PYTHON_VERSION: "3.11"
+  POETRY_VERSION: "1.6.1"
+  ECR_REGISTRY: "your-ecr-registry-url"
+  AWS_DEFAULT_REGION: "your-aws-region"
+  DOCKER_IMAGE_NAME: "legalterm"
+  DOCKERFILE_PATH: "./legal-term/Dockerfile"
+
+before_script:
+  - apk add --no-cache curl jq
+
+checkout:
+  stage: checkout
+  script:
+    - git checkout $CI_COMMIT_REF_NAME
+
+install_dependencies:
+  stage: install_dependencies
+  script:
+    - apk add --no-cache py3-pip py3-setuptools
+    - pip install --upgrade pip
+    - pip install poetry==$POETRY_VERSION
+    - pyenv install $PYTHON_VERSION
+    - pyenv global $PYTHON_VERSION
+    - poetry install
+
+unit_tests:
+  stage: unit_tests
+  script:
+    - poetry run pytest tests/
+
+integration_tests:
+  stage: integration_tests
+  script:
+    - poetry run pytest tests/test_loading.py::test_json_loading
+
+build_and_push_docker_image:
+  stage: build_and_push_docker_image
+  script:
+    - echo $AWS_ECR_CREDENTIALS | docker login --username AWS --password-stdin $ECR_REGISTRY
+    - docker build -t $DOCKER_IMAGE_NAME -f $DOCKERFILE_PATH .
+    - docker tag $DOCKER_IMAGE_NAME $ECR_REGISTRY/$DOCKER_IMAGE_NAME
+    - docker push $ECR_REGISTRY/$DOCKER_IMAGE_NAME
+
+helm_deploy:
+  stage: helm_deploy
+  script:
+    - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+    - chmod +x get_helm.sh
+    - ./get_helm.sh
+    - helm upgrade --install $ARGOCD_APP_NAME $HELM_CHART_PATH --namespace your-namespace
+
+after_script:
+  - rm -rf get_helm.sh
