@@ -146,9 +146,6 @@ pipeline {
                     """
                 }
             }
-            dependencies {
-                stage ('Build and Push Docker Image')
-            }
         }
     }
 
