@@ -1,1 +1,0 @@
-find /backup/myserver1/fullbackup -type f -mtime +14 | xargs rm -rf
