@@ -29,33 +29,40 @@ pipeline {
         // }
 
         stage('install dependencies') {
-        steps {
-            // there a few default environment variables on Jenkins
-            // on local Jenkins machine (assuming port 8080) see
-            // http://localhost:8080/pipeline-syntax/globals#env
-            // echo "Running build ${env.BUILD_ID} on ${env.JENKINS_URL}"
-            sh 'npm install'
-            sh 'npm audit fix --force'
-        }
+            steps {
+                // there a few default environment variables on Jenkins
+                // on local Jenkins machine (assuming port 8080) see
+                // http://localhost:8080/pipeline-syntax/globals#env
+                // echo "Running build ${env.BUILD_ID} on ${env.JENKINS_URL}"
+                nodejs(nodeJSInstallationName: 'NodeJS 14') {
+                    sh 'npm config ls'
+                    sh 'npm install'
+                    sh 'npm audit fix --force'
+                }
+            }
         }
 
         stage('build') {
-        steps {
-            // there a few default environment variables on Jenkins
-            // on local Jenkins machine (assuming port 8080) see
-            // http://localhost:8080/pipeline-syntax/globals#env
-            echo "Running build ${env.BUILD_ID} on ${env.JENKINS_URL}"
-            sh 'npm ci'
-            sh 'npm run cy:verify'
-        }
+            steps {
+                // there a few default environment variables on Jenkins
+                // on local Jenkins machine (assuming port 8080) see
+                // http://localhost:8080/pipeline-syntax/globals#env
+                nodejs(nodeJSInstallationName: 'NodeJS 14') {
+                    echo "Running build ${env.BUILD_ID} on ${env.JENKINS_URL}"
+                    sh 'npm ci'
+                    sh 'npm run cy:verify'
+                }
+            }
         }
 
         stage('start local server') {
-        steps {
-            // start local server in the background
-            // we will shut it down in "post" command block
-            sh 'nohup npm run start &'
-        }
+            steps {
+                // start local server in the background
+                // we will shut it down in "post" command block
+                nodejs(nodeJSInstallationName: 'NodeJS 14') {
+                    sh 'nohup npm run start &'
+                }
+            }
         }
 
         stage('cypress parallel tests') {
